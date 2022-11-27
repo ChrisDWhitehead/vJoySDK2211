@@ -23,6 +23,7 @@
 //#define FFB
 //#define DUMP_FFB_FRAME
 
+using SharpDX.DirectInput;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -594,6 +595,44 @@ namespace Feeder221FB_DI
 #endif // FFB
             return 0;
         }
+
+        static Joystick InitJoystick()
+        {
+            // Initialize DirectInput
+            var directInput = new DirectInput();
+
+            // Find a Joystick Guid
+            var joystickGuid = Guid.Empty;
+
+            foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
+                joystickGuid = deviceInstance.InstanceGuid;
+
+            // If Gamepad not found, look for a Joystick
+            if (joystickGuid == Guid.Empty)
+                foreach (var deviceInstance in directInput.GetDevices(DeviceType.Joystick, DeviceEnumerationFlags.AllDevices))
+                    joystickGuid = deviceInstance.InstanceGuid;
+
+            // If Joystick not found, throws an error
+            if (joystickGuid == Guid.Empty)
+            {
+                Console.WriteLine("No joystick/Gamepad found.");
+                Console.ReadKey();
+                Environment.Exit(1);
+            }
+
+            // Instantiate the joystick
+            var diJoystick = new Joystick(directInput, joystickGuid);
+
+            Console.WriteLine("Found Joystick/Gamepad with GUID: {0} \n", joystickGuid);
+            //Console.ReadKey();
+            //Console.Clear();
+
+            // Set BufferSize in order to use buffered data.
+            diJoystick.Properties.BufferSize = 128;
+
+            return diJoystick;
+        }
+
 
         static void Main(string[] args)
         {
