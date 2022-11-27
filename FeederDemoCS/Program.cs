@@ -2,20 +2,20 @@
 //
 // This project demonstrates how to write a simple vJoy feeder in C#
 //
-// You can compile it with either #define ROBUST OR #define EFFICIENT
-// The fuctionality is similar - 
-// The ROBUST section demonstrate the usage of functions that are easy and safe to use but are less efficient
-// The EFFICIENT ection demonstrate the usage of functions that are more efficient
+// You can compile it with either #define ROBUST OR #define EFFICIENT.
+// The fuctionality is similar.
+// The ROBUST section demonstrate the usage of functions that are easy and safe to use but are less efficient.
+// The EFFICIENT section demonstrate the usage of functions that are more efficient.
 //
 // Functionality:
 //	The program starts with creating one joystick object. 
-//	Then it petches the device id from the command-line and makes sure that it is within range
-//	After testing that the driver is enabled it gets information about the driver
-//	Gets information about the specified virtual device
+//	Then it fetches the device id from the command-line and makes sure that it is within range.
+//	After testing that the driver is enabled it gets information about the driver.
+//	Gets information about the specified virtual device.
 //	This feeder uses only a few axes. It checks their existence and 
 //	checks the number of buttons and POV Hat switches.
-//	Then the feeder acquires the virtual device
-//	Here starts and endless loop that feedes data into the virtual device
+//	Then the feeder acquires the virtual device.
+//	Here starts an endless loop that feeds data into the virtual device.
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROBUST
@@ -109,7 +109,7 @@ namespace FeederDemoCS
         /// Called when vJoy has a new FFB packet.
         /// WARNING This is called from a thread pool managed by windows.
         /// The thread itself is created and managed by vJoyInterface.dll.
-        /// Do not overload it, else you will me missing FFB packets from
+        /// Do not overload it, else you will be missing FFB packets from
         /// third party application.
         /// </summary>
         /// <param name="ffbDataPtr"></param>
@@ -643,16 +643,16 @@ namespace FeederDemoCS
             bool AxisZ = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_Z);
             bool AxisRX = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_RX);
             bool AxisRZ = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_RZ);
-            // Get the number of buttons and POV Hat switchessupported by this vJoy device
+            // Get the number of buttons and POV Hat switches supported by this vJoy device
             int nButtons = joystick.GetVJDButtonNumber(id);
             int ContPovNumber = joystick.GetVJDContPovNumber(id);
             int DiscPovNumber = joystick.GetVJDDiscPovNumber(id);
 
             // Print results
             Console.WriteLine("\nvJoy Device {0} capabilities:", id);
-            Console.WriteLine("Numner of buttons\t\t{0}", nButtons);
-            Console.WriteLine("Numner of Continuous POVs\t{0}", ContPovNumber);
-            Console.WriteLine("Numner of Descrete POVs\t\t{0}", DiscPovNumber);
+            Console.WriteLine("Number of buttons\t\t{0}", nButtons);
+            Console.WriteLine("Number of Continuous POVs\t{0}", ContPovNumber);
+            Console.WriteLine("Number of Discrete POVs\t\t{0}", DiscPovNumber);
             Console.WriteLine("Axis X\t\t{0}", AxisX ? "Yes" : "No");
             Console.WriteLine("Axis Y\t\t{0}", AxisX ? "Yes" : "No");
             Console.WriteLine("Axis Z\t\t{0}", AxisX ? "Yes" : "No");
@@ -677,7 +677,7 @@ namespace FeederDemoCS
 
             StartAndRegisterFFB();
 
-            Console.WriteLine("\npress enter to stat feeding");
+            Console.WriteLine("\nPress enter to start feeding...");
             Console.ReadKey(true);
 
             int X, Y, Z, ZR, XR;
