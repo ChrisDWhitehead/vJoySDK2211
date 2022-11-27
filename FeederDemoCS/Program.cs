@@ -26,6 +26,9 @@
 using SharpDX.DirectInput;
 using System;
 using System.Collections.Generic;
+using System.Collections;
+using static System.Console;
+using static System.Convert;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -599,7 +602,20 @@ namespace Feeder221FB_DI
         MOUSEdn,
         MOUSEbk,
     }
-
+    public class DIDevice
+    {
+        public String name;
+        public Guid id;
+        public DIDevice(String name, Guid id)
+        {
+            this.name = name;
+            this.id = id;
+        }
+        public override string ToString()
+        {
+            return "" + name + " : " + id;
+        }
+    }
     class Program
     {
         // Declaring one joystick (Device id 1) and a position structure. 
@@ -636,15 +652,34 @@ namespace Feeder221FB_DI
 
             // Find a Joystick Guid
             var joystickGuid = Guid.Empty;
+            ArrayList DIDevices = new ArrayList();
 
             foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
-                joystickGuid = deviceInstance.InstanceGuid;
+                DIDevices.Add(new DIDevice(deviceInstance.InstanceName, deviceInstance.InstanceGuid));
 
             // If Gamepad not found, look for a Joystick
             if (joystickGuid == Guid.Empty)
                 foreach (var deviceInstance in directInput.GetDevices(DeviceType.Joystick, DeviceEnumerationFlags.AllDevices))
-                    joystickGuid = deviceInstance.InstanceGuid;
+                    DIDevices.Add(new DIDevice(deviceInstance.InstanceName, deviceInstance.InstanceGuid));
+            
+            // Display a list of detected devices
+            int i = 1;
+            foreach (DIDevice device in DIDevices)
+            {
+                Console.WriteLine($"{i} {device.ToString()}");
+                i++;
+            }
 
+            //Take and check users input
+            Int32 choice = 0;
+            while (choice < 1 | choice > DIDevices.Count)
+            {
+                WriteLine("Choose a Joystick to use: ");
+                choice = ToInt32(ReadLine());
+            }
+            joystickGuid = ((DIDevice)DIDevices[choice - 1]).id;
+
+            // This no longer needed
             // If Joystick not found, throws an error
             if (joystickGuid == Guid.Empty)
             {
@@ -653,12 +688,21 @@ namespace Feeder221FB_DI
                 Environment.Exit(1);
             }
 
-            // Instantiate the joystick
+            // Instantiate the Direct Input joystick
             var diJoystick = new Joystick(directInput, joystickGuid);
 
             Console.WriteLine("Found Joystick/Gamepad with GUID: {0} \n", joystickGuid);
-            //Console.ReadKey();
-            //Console.Clear();
+            Console.ReadKey();
+            Console.Clear();
+
+            // Query all suported ForceFeedback effects
+            var allEffects = diJoystick.GetEffects();
+            foreach (var effectInfo in allEffects)
+                Console.WriteLine("Effect available {0}", effectInfo.Name);
+            if (allEffects.Count == 0)
+                WriteLine("Force Feedback Effects not supported");
+            ReadKey();
+            Clear();
 
             // Set BufferSize in order to use buffered data.
             diJoystick.Properties.BufferSize = 128;
