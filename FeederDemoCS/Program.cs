@@ -20,8 +20,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROBUST
 //#define EFFICIENT
-#define FFB
-#define DUMP_FFB_FRAME
+//#define FFB
+//#define DUMP_FFB_FRAME
 
 using System;
 using System.Collections.Generic;
