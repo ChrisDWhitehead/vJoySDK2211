@@ -343,8 +343,9 @@ namespace Feeder221FB_DI
 
             #endregion
 
-
+#if DUMP_FFB_FRAME
             DumpFrame(data);
+#endif
             LogFormat("======================================");
 
         }
