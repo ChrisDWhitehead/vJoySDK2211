@@ -623,6 +623,8 @@ namespace Feeder221FB_DI
         static public vJoy.JoystickState iReport;
         static public vJoyFFBReceiver FFBReceiver;
         static public uint id = 1;
+        static public string deviceName;
+        //static ArrayList DIDevices = new ArrayList();
 
         static public int StartAndRegisterFFB()
         {
@@ -678,6 +680,7 @@ namespace Feeder221FB_DI
                 choice = ToInt32(ReadLine());
             }
             joystickGuid = ((DIDevice)DIDevices[choice - 1]).id;
+            deviceName = ((DIDevice)DIDevices[choice - 1]).name;
 
             // This no longer needed
             // If Joystick not found, throws an error
@@ -716,6 +719,7 @@ namespace Feeder221FB_DI
             joystick = new vJoy();
             iReport = new vJoy.JoystickState();
             FFBReceiver = new vJoyFFBReceiver();
+
 
             // Device ID can only be in the range 1-16
             if (args.Length>0 && !String.IsNullOrEmpty(args[0]))
@@ -904,12 +908,47 @@ namespace Feeder221FB_DI
                     cal = false;
 
 
-                Thread.Sleep(250);
+                Thread.Sleep(20);
                 Console.Clear();
             }
 
             // Feed the device in endless loop
             while (true) {
+
+                diJoystick.Poll();
+
+                var data = diJoystick.GetBufferedData();
+                // retrieves DIJOYSTATE2 (device with extended capabilities)
+                var data2 = diJoystick.GetCurrentState();
+                //foreach (var state in data)
+                //    Console.WriteLine(state);
+                Console.WriteLine($"Trig:\t{data2.Buttons[(int)BN.TRIG]}\tAxisX:\t{data2.X}\n" +
+                                  $"A:\t{data2.Buttons[(int)BN.A]}\tAxisY:\t{data2.Y}\n" +
+                                  $"B:\t{data2.Buttons[(int)BN.B]}\tAxisZ:\t{data2.Z}\n" +
+                                  $"C:\t{data2.Buttons[(int)BN.C]}\n" +
+                                  $"D:\t{data2.Buttons[(int)BN.D]}\tAxisXr:\t{data2.RotationX}\n" +
+                                  $"Lnch:\t{data2.Buttons[(int)BN.LAUNCH]}\tAxisYr:\t{data2.RotationY}\n" +
+                                  $"Pnky:\t{data2.Buttons[(int)BN.PINKY]}\tAxisZr:\t{data2.RotationZ}\n" +
+                                  $"MClck:\t{data2.Buttons[(int)BN.MCLICK]}\n" +
+                                  $"\nMode1:\t{data2.Buttons[(int)BN.M1]}\tSlide0:\t{data2.Sliders[0]}\n" +
+                                  $"Mode2:\t{data2.Buttons[(int)BN.M2]}\tSlide1:\t{data2.Sliders[1]}\n" +
+                                  $"Mode3:\t{data2.Buttons[(int)BN.M3]}\n" +
+                                  $"\nAUX0:\t{data2.Buttons[(int)BN.AUX0]}\tPOV:\t{data2.PointOfViewControllers[0]}\n" +
+                                  $"AUX1:\t{data2.Buttons[(int)BN.AUX1]}\n" +
+                                  $"AUX2:\t{data2.Buttons[(int)BN.AUX2]}\n" +
+                                  $"\n\tHATup:\t{data2.Buttons[(int)BN.HATup]}\n" +
+                                  $"HATlf:\t{data2.Buttons[(int)BN.HATlf]}\tHATrt:\t{data2.Buttons[(int)BN.HATrt]}\n" +
+                                  $"\tHATdn:\t{data2.Buttons[(int)BN.HATdn]}\n" +
+                                  $"\n\ttHATup:\t{data2.Buttons[(int)BN.tHATup]}\n" +
+                                  $"tHATlf:\t{data2.Buttons[(int)BN.tHATlf]}\ttHATrt:\t{data2.Buttons[(int)BN.tHATrt]}\n" +
+                                  $"\ttHATdn:\t{data2.Buttons[(int)BN.tHATdn]}\n" +
+                                  $"\n\tMSEup:\t{data2.Buttons[(int)BN.MOUSEup]}\n" +
+                                  $"MSEbk:\t{data2.Buttons[(int)BN.MOUSEbk]}\tMSEfw:\t{data2.Buttons[(int)BN.MOUSEfw]}\n" +
+                                  $"\tMSEdn:\t{data2.Buttons[(int)BN.MOUSEdn]}\n" +
+                                  $"Using device: {deviceName}");
+                Thread.Sleep(20);
+                Console.Clear();
+
                 // Set position of 4 axes
                 res = joystick.SetAxis(X, id, HID_USAGES.HID_USAGE_X);
                 res = joystick.SetAxis(Y, id, HID_USAGES.HID_USAGE_Y);
@@ -953,7 +992,7 @@ namespace Feeder221FB_DI
                     };
                 };
 
-                System.Threading.Thread.Sleep(20);
+                //Thread.Sleep(20);
                 X += 150; if (X > maxval) X = 0;
                 Y += 250; if (Y > maxval) Y = 0;
                 Z += 350; if (Z > maxval) Z = 0;
