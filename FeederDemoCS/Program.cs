@@ -633,7 +633,6 @@ namespace Feeder221FB_DI
             return diJoystick;
         }
 
-
         static void Main(string[] args)
         {
             // Create one joystick object and a position structure.
@@ -718,6 +717,11 @@ namespace Feeder221FB_DI
 
             Console.WriteLine("\nPress enter to start feeding...");
             Console.ReadKey(true);
+
+            // Initialize physical joystick
+            var diJoystick = InitJoystick();
+            // Acquire the physical joystick
+            diJoystick.Acquire();
 
             int X, Y, Z, ZR, XR;
             uint count = 0;
