@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 // Don't forget to add this
 using vJoyInterfaceWrap;
@@ -568,6 +569,37 @@ namespace Feeder221FB_DI
 
     }
 
+    //Create ENUM for button name to buttons index
+    enum BN
+    {
+        TRIG,
+        A,
+        B,
+        LAUNCH,
+        D,
+        MCLICK,
+        PINKY,
+        C,
+        M1,
+        M2,
+        M3,
+        AUX0,
+        AUX1,
+        AUX2,
+        HATup,
+        HATrt,
+        HATdn,
+        HATlf,
+        tHATup,
+        tHATrt,
+        tHATdn,
+        tHATlf,
+        MOUSEup,
+        MOUSEfw,
+        MOUSEdn,
+        MOUSEbk,
+    }
+
     class Program
     {
         // Declaring one joystick (Device id 1) and a position structure. 
@@ -740,6 +772,97 @@ namespace Feeder221FB_DI
             bool res;
             // Reset this device to default values
             joystick.ResetVJD(id);
+
+            // Calibrate axis, two step, min-max, then center
+            bool run = true;
+            bool cal = true;
+            bool cen = true;
+
+            //int X, Xmin, Xmax, Y, Ymin, Ymax, Z, Zmin, Zmax, RDR, TH, RZ, RZmin, RZmax, RX, RY, SL0, SL0min, SL0max, SL1;
+            int Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, RDR, TH, RZ, RZmin, RZmax, RX, RY, SL0, SL0min, SL0max, SL1;
+            int Xcen, Ycen, RZcen;
+            float Xcorrhi, Xcorrlo, Ycorrhi, Ycorrlo, Zcorrhi, RZcorrhi, RZcorrlo, SL0corr;
+            
+
+            X = 16383;
+            Xmin = 65535;
+            Xmax = 0;
+            Xcorrhi = 1;
+            Xcorrlo = 1;
+            Xcen = 32767;
+            Y = 16383;
+            Ymin = 65535;
+            Ymax = 0;
+            Ycorrhi = 1;
+            Ycorrlo = 1;
+            Ycen = 32767;
+            Z = 32767;
+            Zmin = 65535;
+            Zmax = 0;
+            Zcorrhi = 1;
+            //RX = 16383;
+            //RY = 16383;
+            RZ = 32767;
+            RZmin = 65535;
+            RZmax = 0;
+            RZcorrhi = 1;
+            RZcorrlo = 1;
+            RZcen = 32767;
+            SL0 = 32767;
+            SL0min = 65535;
+            SL0max = 0;
+            SL0corr = 1;
+            //SL1 = 16383;
+            //RDR = 0;
+            //TH = 0;
+
+
+            while (cal)
+            {
+                diJoystick.Poll();
+
+                var data2 = diJoystick.GetCurrentState();
+
+                if (data2.X > Xmax)
+                    Xmax = data2.X;
+                if (data2.X < Xmin)
+                    Xmin = data2.X;
+
+                if (data2.Y > Ymax)
+                    Ymax = data2.Y;
+                if (data2.Y < Ymin)
+                    Ymin = data2.Y;
+
+                if (data2.Sliders[0] > SL0max)
+                    SL0max = data2.Sliders[0];
+                if (data2.Sliders[0] < SL0min)
+                    SL0min = data2.Sliders[0];
+
+                if (data2.RotationZ > RZmax)
+                    RZmax = data2.RotationZ;
+                if (data2.RotationZ < RZmin)
+                    RZmin = data2.RotationZ;
+
+                Xcen = data2.X;
+                Ycen = data2.Y;
+                RZcen = data2.RotationZ;
+
+                Console.WriteLine("Calibrate Axis (move all axis to limits)...");
+                Console.WriteLine("Press Trigger to finish.");
+                Console.WriteLine($"XCal: Min={Xmin} Max={Xmax} Cen={Xcen}");
+                Console.WriteLine($"YCal: Min={Ymin} Max={Ymax} Cen={Ycen}");
+                Console.WriteLine($"ZCal: Min={SL0min} Max={SL0max}");
+                Console.WriteLine($"RZCal: Min={RZmin} Max={RZmax} Cen={RZcen}");
+                
+
+
+                if (data2.Buttons[(int)BN.TRIG])
+                    cal = false;
+
+
+                Thread.Sleep(250);
+                Console.Clear();
+            }
 
             // Feed the device in endless loop
             while (true) {
