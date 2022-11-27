@@ -31,7 +31,7 @@ using System.Text;
 // Don't forget to add this
 using vJoyInterfaceWrap;
 
-namespace FeederDemoCS
+namespace Feeder221FB_DI
 {
     public class vJoyFFBReceiver
     {
@@ -825,4 +825,4 @@ namespace FeederDemoCS
 
         } // Main
     } // class Program
-} // namespace FeederDemoCS
+} // namespace Feeder221FB_DI
