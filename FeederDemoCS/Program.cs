@@ -615,7 +615,7 @@ namespace FeederDemoCS
                 Console.WriteLine("vJoy driver not enabled: Failed Getting vJoy attributes.");
                 return;
             } else
-                Console.WriteLine("Vendor: {0}\nProduct :{1}\nVersion Number:{2}", joystick.GetvJoyManufacturerString(), joystick.GetvJoyProductString(), joystick.GetvJoySerialNumberString());
+                Console.WriteLine(" Vendor: {0}\nProduct: {1}\nVersion: {2}", joystick.GetvJoyManufacturerString(), joystick.GetvJoyProductString(), joystick.GetvJoySerialNumberString());
 
             // Get the state of the requested device
             VjdStat status = joystick.GetVJDStatus(id);
@@ -665,7 +665,7 @@ namespace FeederDemoCS
             if (match)
                 Console.WriteLine("Version of Driver Matches DLL Version ({0:X})", DllVer);
             else
-                Console.WriteLine("Version of Driver ({0:X}) does NOT match DLL Version ({1:X})", DrvVer, DllVer);
+                Console.WriteLine("Version of Driver ({0:X}) does NOT match SDK DLL Version ({1:X})", DrvVer, DllVer);
 
 
             // Acquire the target
