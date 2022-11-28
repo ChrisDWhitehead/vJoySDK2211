@@ -713,6 +713,21 @@ namespace Feeder221FB_DI
             return diJoystick;
         }
 
+        uint ToUint(bool[] barray)
+        {
+            uint buttons = 0;
+            uint index = 0;
+            foreach(bool button in barray)
+            {
+                if (button)
+                {
+                    buttons += 2 ^ index;
+                }
+                index++;
+            }
+            return buttons;
+        }
+
         static void Main(string[] args)
         {
             // Create one joystick object and a position structure.
@@ -1024,11 +1039,12 @@ namespace Feeder221FB_DI
                 SL0 = data2.Sliders[0] / 2;
                 SL1 = data2.Sliders[1] / 2;
             } // While (Robust)
-            //vJoystick.RelinquishVJD(vJoyID);
+        //vJoystick.RelinquishVJD(vJoyID);
 #endif // ROBUST
 #if EFFICIENT
 
-            byte[] pov = new byte[4];
+        byte[] pov = new byte[4];
+        uint buttons = new uint();
 
         while (true)
             {
@@ -1042,7 +1058,7 @@ namespace Feeder221FB_DI
             // Set buttons one by one
             //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
             // Buttons represented by a binary on/off, bit position represents button position
-            iReport.Buttons = 0b101010101;
+            iReport.Buttons = 12;
 
         if (ContPovNumber>0)
         {
@@ -1087,6 +1103,8 @@ namespace Feeder221FB_DI
 
         diJoystick.Poll();
         var data2 = diJoystick.GetCurrentState();
+
+                //buttons = (uint)data2.Buttons;
 
         X = data2.X / 2;
         Y = data2.Y / 2;
