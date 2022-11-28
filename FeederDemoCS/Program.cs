@@ -713,7 +713,7 @@ namespace Feeder221FB_DI
             return diJoystick;
         }
 
-        uint ToUint(bool[] barray)
+        static public uint GetButtons(bool[] barray)
         {
             uint buttons = 0;
             uint index = 0;
@@ -815,9 +815,10 @@ namespace Feeder221FB_DI
             Console.ReadKey(true);
 
             // Initialize physical joystick
-            var diJoystick = InitJoystick();
+            Joystick diJoystick = InitJoystick();
             // Acquire the physical joystick
             diJoystick.Acquire();
+            JoystickState data2;
 
             int X, Y, Z, ZR, YR, XR, SL0, SL1;
             uint count = 0;
@@ -1045,6 +1046,7 @@ namespace Feeder221FB_DI
 
         byte[] pov = new byte[4];
         uint buttons = new uint();
+        
 
         while (true)
             {
@@ -1058,7 +1060,7 @@ namespace Feeder221FB_DI
             // Set buttons one by one
             //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
             // Buttons represented by a binary on/off, bit position represents button position
-            iReport.Buttons = 12;
+            iReport.Buttons = buttons;
 
         if (ContPovNumber>0)
         {
@@ -1102,9 +1104,9 @@ namespace Feeder221FB_DI
         if (count > 640) count = 0;
 
         diJoystick.Poll();
-        var data2 = diJoystick.GetCurrentState();
+        data2 = diJoystick.GetCurrentState();
 
-                //buttons = (uint)data2.Buttons;
+        buttons = GetButtons(data2.Buttons);
 
         X = data2.X / 2;
         Y = data2.Y / 2;
