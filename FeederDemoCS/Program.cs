@@ -1030,7 +1030,7 @@ namespace Feeder221FB_DI
 
             byte[] pov = new byte[4];
 
-      while (true)
+        while (true)
             {
             iReport.bDevice = (byte)vJoyID;
             iReport.AxisX = X;
@@ -1040,7 +1040,9 @@ namespace Feeder221FB_DI
             iReport.AxisXRot = XR;
 
             // Set buttons one by one
-            iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
+            //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
+            // Buttons represented by a binary on/off, bit position represents button position
+            iReport.Buttons = 0b101010101;
 
         if (ContPovNumber>0)
         {
@@ -1079,17 +1081,32 @@ namespace Feeder221FB_DI
             vJoystick.AcquireVJD(vJoyID);
         }
 
-        System.Threading.Thread.Sleep(20);
+        System.Threading.Thread.Sleep(5);
         count++;
         if (count > 640) count = 0;
 
-        X += 150; if (X > maxval) X = 0;
-        Y += 250; if (Y > maxval) Y = 0;
-        Z += 350; if (Z > maxval) Z = 0;
-        XR += 220; if (XR > maxval) XR = 0;
-        ZR += 200; if (ZR > maxval) ZR = 0;  
+        diJoystick.Poll();
+        var data2 = diJoystick.GetCurrentState();
+
+        X = data2.X / 2;
+        Y = data2.Y / 2;
+        Z = data2.Z / 2;
+
+        XR = data2.RotationX / 2;
+        YR = data2.RotationY / 2;
+        ZR = data2.RotationZ / 2;
+
+        SL0 = data2.Sliders[0] / 2;
+        SL1 = data2.Sliders[1] / 2;
+
+
+        //X += 150; if (X > maxval) X = 0;
+        //Y += 250; if (Y > maxval) Y = 0;
+        //Z += 350; if (Z > maxval) Z = 0;
+        //XR += 220; if (XR > maxval) XR = 0;
+        //ZR += 200; if (ZR > maxval) ZR = 0;  
          
-      }; // While
+        }; // While
 
 #endif // EFFICIENT
 
