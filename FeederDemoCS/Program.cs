@@ -18,8 +18,8 @@
 //	Here starts an endless loop that feeds data into the virtual device.
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define ROBUST
-//#define EFFICIENT
+//#define ROBUST
+#define EFFICIENT
 //#define FFB
 //#define DUMP_FFB_FRAME
 
@@ -619,10 +619,10 @@ namespace Feeder221FB_DI
     class Program
     {
         // Declaring one joystick (Device id 1) and a position structure. 
-        static public vJoy joystick;
+        static public vJoy vJoystick;
         static public vJoy.JoystickState iReport;
         static public vJoyFFBReceiver FFBReceiver;
-        static public uint id = 1;
+        static public uint vJoyID = 1;
         static public string deviceName;
         //static ArrayList DIDevices = new ArrayList();
 
@@ -716,59 +716,59 @@ namespace Feeder221FB_DI
         static void Main(string[] args)
         {
             // Create one joystick object and a position structure.
-            joystick = new vJoy();
+            vJoystick = new vJoy();
             iReport = new vJoy.JoystickState();
             FFBReceiver = new vJoyFFBReceiver();
 
 
             // Device ID can only be in the range 1-16
             if (args.Length>0 && !String.IsNullOrEmpty(args[0]))
-                id = Convert.ToUInt32(args[0]);
-            if (id <= 0 || id > 16) {
-                Console.WriteLine("Illegal device ID {0}\nExit!", id);
+                vJoyID = Convert.ToUInt32(args[0]);
+            if (vJoyID <= 0 || vJoyID > 16) {
+                Console.WriteLine("Illegal device ID {0}\nExit!", vJoyID);
                 return;
             }
 
             // Get the driver attributes (Vendor ID, Product ID, Version Number)
-            if (!joystick.vJoyEnabled()) {
+            if (!vJoystick.vJoyEnabled()) {
                 Console.WriteLine("vJoy driver not enabled: Failed Getting vJoy attributes.");
                 return;
             } else
-                Console.WriteLine(" Vendor: {0}\nProduct: {1}\nVersion: {2}", joystick.GetvJoyManufacturerString(), joystick.GetvJoyProductString(), joystick.GetvJoySerialNumberString());
+                Console.WriteLine(" Vendor: {0}\nProduct: {1}\nVersion: {2}", vJoystick.GetvJoyManufacturerString(), vJoystick.GetvJoyProductString(), vJoystick.GetvJoySerialNumberString());
 
             // Get the state of the requested device
-            VjdStat status = joystick.GetVJDStatus(id);
+            VjdStat status = vJoystick.GetVJDStatus(vJoyID);
             switch (status) {
                 case VjdStat.VJD_STAT_OWN:
-                    Console.WriteLine("vJoy Device {0} is already owned by this feeder", id);
+                    Console.WriteLine("vJoy Device {0} is already owned by this feeder", vJoyID);
                     break;
                 case VjdStat.VJD_STAT_FREE:
-                    Console.WriteLine("vJoy Device {0} is free", id);
+                    Console.WriteLine("vJoy Device {0} is free", vJoyID);
                     break;
                 case VjdStat.VJD_STAT_BUSY:
-                    Console.WriteLine("vJoy Device {0} is already owned by another feeder\nCannot continue", id);
+                    Console.WriteLine("vJoy Device {0} is already owned by another feeder\nCannot continue", vJoyID);
                     return;
                 case VjdStat.VJD_STAT_MISS:
-                    Console.WriteLine("vJoy Device {0} is not installed or disabled\nCannot continue", id);
+                    Console.WriteLine("vJoy Device {0} is not installed or disabled\nCannot continue", vJoyID);
                     return;
                 default:
-                    Console.WriteLine("vJoy Device {0} general error\nCannot continue", id);
+                    Console.WriteLine("vJoy Device {0} general error\nCannot continue", vJoyID);
                     return;
             };
 
             // Check which axes are supported
-            bool AxisX = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_X);
-            bool AxisY = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_Y);
-            bool AxisZ = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_Z);
-            bool AxisRX = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_RX);
-            bool AxisRZ = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_RZ);
+            bool AxisX = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_X);
+            bool AxisY = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_Y);
+            bool AxisZ = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_Z);
+            bool AxisRX = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_RX);
+            bool AxisRZ = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_RZ);
             // Get the number of buttons and POV Hat switches supported by this vJoy device
-            int nButtons = joystick.GetVJDButtonNumber(id);
-            int ContPovNumber = joystick.GetVJDContPovNumber(id);
-            int DiscPovNumber = joystick.GetVJDDiscPovNumber(id);
+            int nButtons = vJoystick.GetVJDButtonNumber(vJoyID);
+            int ContPovNumber = vJoystick.GetVJDContPovNumber(vJoyID);
+            int DiscPovNumber = vJoystick.GetVJDDiscPovNumber(vJoyID);
 
             // Print results
-            Console.WriteLine("\nvJoy Device {0} capabilities:", id);
+            Console.WriteLine("\nvJoy Device {0} capabilities:", vJoyID);
             Console.WriteLine("Number of buttons\t\t{0}", nButtons);
             Console.WriteLine("Number of Continuous POVs\t{0}", ContPovNumber);
             Console.WriteLine("Number of Discrete POVs\t\t{0}", DiscPovNumber);
@@ -780,7 +780,7 @@ namespace Feeder221FB_DI
 
             // Test if DLL matches the driver
             UInt32 DllVer = 0, DrvVer = 0;
-            bool match = joystick.DriverMatch(ref DllVer, ref DrvVer);
+            bool match = vJoystick.DriverMatch(ref DllVer, ref DrvVer);
             if (match)
                 Console.WriteLine("Version of Driver Matches DLL Version ({0:X})", DllVer);
             else
@@ -788,11 +788,11 @@ namespace Feeder221FB_DI
 
 
             // Acquire the target
-            if ((status == VjdStat.VJD_STAT_OWN) || ((status == VjdStat.VJD_STAT_FREE) && (!joystick.AcquireVJD(id)))) {
-                Console.WriteLine("Failed to acquire vJoy device number {0}.", id);
+            if ((status == VjdStat.VJD_STAT_OWN) || ((status == VjdStat.VJD_STAT_FREE) && (!vJoystick.AcquireVJD(vJoyID)))) {
+                Console.WriteLine("Failed to acquire vJoy device number {0}.", vJoyID);
                 return;
             } else
-                Console.WriteLine("Acquired: vJoy device number {0}.", id);
+                Console.WriteLine("Acquired: vJoy device number {0}.", vJoyID);
 
             StartAndRegisterFFB();
 
@@ -804,7 +804,7 @@ namespace Feeder221FB_DI
             // Acquire the physical joystick
             diJoystick.Acquire();
 
-            int X, Y, Z, ZR, XR;
+            int X, Y, Z, ZR, YR, XR, SL0, SL1;
             uint count = 0;
             long maxval = 0;
 
@@ -812,14 +812,17 @@ namespace Feeder221FB_DI
             Y = 30;
             Z = 40;
             XR = 60;
+            YR = 0;
             ZR = 80;
+            SL0 = 0;
+            SL1 = 0;
 
-            joystick.GetVJDAxisMax(id, HID_USAGES.HID_USAGE_X, ref maxval);
+            vJoystick.GetVJDAxisMax(vJoyID, HID_USAGES.HID_USAGE_X, ref maxval);
 
 #if ROBUST
             bool res;
             // Reset this device to default values
-            joystick.ResetVJD(id);
+            vJoystick.ResetVJD(vJoyID);
 
             // Calibrate axis, two step, min-max, then center
             bool run = true;
@@ -827,7 +830,7 @@ namespace Feeder221FB_DI
             bool cen = true;
 
             //int X, Xmin, Xmax, Y, Ymin, Ymax, Z, Zmin, Zmax, RDR, TH, RZ, RZmin, RZmax, RX, RY, SL0, SL0min, SL0max, SL1;
-            int Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, RDR, TH, RZ, RZmin, RZmax, RX, RY, SL0, SL0min, SL0max, SL1;
+            int Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, RDR, TH, RZ, RZmin, RZmax, RX, RY,  SL0min, SL0max ;
             int Xcen, Ycen, RZcen;
             float Xcorrhi, Xcorrlo, Ycorrhi, Ycorrlo, Zcorrhi, RZcorrhi, RZcorrlo, SL0corr;
             
@@ -922,57 +925,64 @@ namespace Feeder221FB_DI
                 var data2 = diJoystick.GetCurrentState();
                 //foreach (var state in data)
                 //    Console.WriteLine(state);
-                Console.WriteLine($"Trig:\t{data2.Buttons[(int)BN.TRIG]}\tAxisX:\t{data2.X}\n" +
-                                  $"A:\t{data2.Buttons[(int)BN.A]}\tAxisY:\t{data2.Y}\n" +
-                                  $"B:\t{data2.Buttons[(int)BN.B]}\tAxisZ:\t{data2.Z}\n" +
-                                  $"C:\t{data2.Buttons[(int)BN.C]}\n" +
-                                  $"D:\t{data2.Buttons[(int)BN.D]}\tAxisXr:\t{data2.RotationX}\n" +
-                                  $"Lnch:\t{data2.Buttons[(int)BN.LAUNCH]}\tAxisYr:\t{data2.RotationY}\n" +
-                                  $"Pnky:\t{data2.Buttons[(int)BN.PINKY]}\tAxisZr:\t{data2.RotationZ}\n" +
-                                  $"MClck:\t{data2.Buttons[(int)BN.MCLICK]}\n" +
-                                  $"\nMode1:\t{data2.Buttons[(int)BN.M1]}\tSlide0:\t{data2.Sliders[0]}\n" +
-                                  $"Mode2:\t{data2.Buttons[(int)BN.M2]}\tSlide1:\t{data2.Sliders[1]}\n" +
-                                  $"Mode3:\t{data2.Buttons[(int)BN.M3]}\n" +
-                                  $"\nAUX0:\t{data2.Buttons[(int)BN.AUX0]}\tPOV:\t{data2.PointOfViewControllers[0]}\n" +
-                                  $"AUX1:\t{data2.Buttons[(int)BN.AUX1]}\n" +
-                                  $"AUX2:\t{data2.Buttons[(int)BN.AUX2]}\n" +
-                                  $"\n\tHATup:\t{data2.Buttons[(int)BN.HATup]}\n" +
-                                  $"HATlf:\t{data2.Buttons[(int)BN.HATlf]}\tHATrt:\t{data2.Buttons[(int)BN.HATrt]}\n" +
-                                  $"\tHATdn:\t{data2.Buttons[(int)BN.HATdn]}\n" +
-                                  $"\n\ttHATup:\t{data2.Buttons[(int)BN.tHATup]}\n" +
-                                  $"tHATlf:\t{data2.Buttons[(int)BN.tHATlf]}\ttHATrt:\t{data2.Buttons[(int)BN.tHATrt]}\n" +
-                                  $"\ttHATdn:\t{data2.Buttons[(int)BN.tHATdn]}\n" +
-                                  $"\n\tMSEup:\t{data2.Buttons[(int)BN.MOUSEup]}\n" +
-                                  $"MSEbk:\t{data2.Buttons[(int)BN.MOUSEbk]}\tMSEfw:\t{data2.Buttons[(int)BN.MOUSEfw]}\n" +
-                                  $"\tMSEdn:\t{data2.Buttons[(int)BN.MOUSEdn]}\n" +
-                                  $"Using device: {deviceName}");
-                Thread.Sleep(20);
+                //Console.WriteLine($"Trig:\t{data2.Buttons[(int)BN.TRIG]}\tAxisX:\t{data2.X}\n" +
+                //                  $"A:\t{data2.Buttons[(int)BN.A]}\tAxisY:\t{data2.Y}\n" +
+                //                  $"B:\t{data2.Buttons[(int)BN.B]}\tAxisZ:\t{data2.Z}\n" +
+                //                  $"C:\t{data2.Buttons[(int)BN.C]}\n" +
+                //                  $"D:\t{data2.Buttons[(int)BN.D]}\tAxisXr:\t{data2.RotationX}\n" +
+                //                  $"Lnch:\t{data2.Buttons[(int)BN.LAUNCH]}\tAxisYr:\t{data2.RotationY}\n" +
+                //                  $"Pnky:\t{data2.Buttons[(int)BN.PINKY]}\tAxisZr:\t{data2.RotationZ}\n" +
+                //                  $"MClck:\t{data2.Buttons[(int)BN.MCLICK]}\n" +
+                //                  $"\nMode1:\t{data2.Buttons[(int)BN.M1]}\tSlide0:\t{data2.Sliders[0]}\n" +
+                //                  $"Mode2:\t{data2.Buttons[(int)BN.M2]}\tSlide1:\t{data2.Sliders[1]}\n" +
+                //                  $"Mode3:\t{data2.Buttons[(int)BN.M3]}\n" +
+                //                  $"\nAUX0:\t{data2.Buttons[(int)BN.AUX0]}\tPOV:\t{data2.PointOfViewControllers[0]}\n" +
+                //                  $"AUX1:\t{data2.Buttons[(int)BN.AUX1]}\n" +
+                //                  $"AUX2:\t{data2.Buttons[(int)BN.AUX2]}\n" +
+                //                  $"\n\tHATup:\t{data2.Buttons[(int)BN.HATup]}\n" +
+                //                  $"HATlf:\t{data2.Buttons[(int)BN.HATlf]}\tHATrt:\t{data2.Buttons[(int)BN.HATrt]}\n" +
+                //                  $"\tHATdn:\t{data2.Buttons[(int)BN.HATdn]}\n" +
+                //                  $"\n\ttHATup:\t{data2.Buttons[(int)BN.tHATup]}\n" +
+                //                  $"tHATlf:\t{data2.Buttons[(int)BN.tHATlf]}\ttHATrt:\t{data2.Buttons[(int)BN.tHATrt]}\n" +
+                //                  $"\ttHATdn:\t{data2.Buttons[(int)BN.tHATdn]}\n" +
+                //                  $"\n\tMSEup:\t{data2.Buttons[(int)BN.MOUSEup]}\n" +
+                //                  $"MSEbk:\t{data2.Buttons[(int)BN.MOUSEbk]}\tMSEfw:\t{data2.Buttons[(int)BN.MOUSEfw]}\n" +
+                //                  $"\tMSEdn:\t{data2.Buttons[(int)BN.MOUSEdn]}\n" +
+                //                  $"Using device: {deviceName}");
+                Thread.Sleep(5);
                 Console.Clear();
 
                 // Set position of 4 axes
-                res = joystick.SetAxis(X, id, HID_USAGES.HID_USAGE_X);
-                res = joystick.SetAxis(Y, id, HID_USAGES.HID_USAGE_Y);
-                res = joystick.SetAxis(Z, id, HID_USAGES.HID_USAGE_Z);
-                res = joystick.SetAxis(XR, id, HID_USAGES.HID_USAGE_RX);
-                res = joystick.SetAxis(ZR, id, HID_USAGES.HID_USAGE_RZ);
+                res = vJoystick.SetAxis(X, vJoyID, HID_USAGES.HID_USAGE_X);
+                res = vJoystick.SetAxis(Y, vJoyID, HID_USAGES.HID_USAGE_Y);
+                res = vJoystick.SetAxis(Z, vJoyID, HID_USAGES.HID_USAGE_Z);
+                res = vJoystick.SetAxis(XR, vJoyID, HID_USAGES.HID_USAGE_RX);
+                res = vJoystick.SetAxis(YR, vJoyID, HID_USAGES.HID_USAGE_RY);
+                res = vJoystick.SetAxis(ZR, vJoyID, HID_USAGES.HID_USAGE_RZ);
+                res = vJoystick.SetAxis(SL0, vJoyID, HID_USAGES.HID_USAGE_SL0);
+                res = vJoystick.SetAxis(SL1, vJoyID, HID_USAGES.HID_USAGE_SL1);
 
                 // Press/Release Buttons
-                res = joystick.SetBtn(true, id, count / 50);
-                res = joystick.SetBtn(false, id, 1 + count / 50);
+                //res = joystick.SetBtn(true, vJoyID, count / 50);
+                //res = joystick.SetBtn(false, vJoyID, 1 + count / 50);
+                res = vJoystick.SetBtn(data2.Buttons[(int)BN.TRIG], vJoyID, (int)BN.TRIG+1);
+                res = vJoystick.SetBtn(data2.Buttons[(int)BN.A], vJoyID, (int)BN.A+1);
+                res = vJoystick.SetBtn(data2.Buttons[(int)BN.B], vJoyID, (int)BN.B);
+                res = vJoystick.SetBtn(data2.Buttons[(int)BN.C], vJoyID, (int)BN.C);
 
                 // If Continuous POV hat switches installed - make them go round
                 // For high values - put the switches in neutral state
                 if (ContPovNumber>0) {
                     if ((count * 70) < 30000) {
-                        res = joystick.SetContPov(((int)count * 70), id, 1);
-                        res = joystick.SetContPov(((int)count * 70) + 2000, id, 2);
-                        res = joystick.SetContPov(((int)count * 70) + 4000, id, 3);
-                        res = joystick.SetContPov(((int)count * 70) + 6000, id, 4);
+                        res = vJoystick.SetContPov(((int)count * 70), vJoyID, 1);
+                        res = vJoystick.SetContPov(((int)count * 70) + 2000, vJoyID, 2);
+                        res = vJoystick.SetContPov(((int)count * 70) + 4000, vJoyID, 3);
+                        res = vJoystick.SetContPov(((int)count * 70) + 6000, vJoyID, 4);
                     } else {
-                        res = joystick.SetContPov(-1, id, 1);
-                        res = joystick.SetContPov(-1, id, 2);
-                        res = joystick.SetContPov(-1, id, 3);
-                        res = joystick.SetContPov(-1, id, 4);
+                        res = vJoystick.SetContPov(-1, vJoyID, 1);
+                        res = vJoystick.SetContPov(-1, vJoyID, 2);
+                        res = vJoystick.SetContPov(-1, vJoyID, 3);
+                        res = vJoystick.SetContPov(-1, vJoyID, 4);
                     };
                 };
 
@@ -980,31 +990,41 @@ namespace Feeder221FB_DI
                 // From time to time - put the switches in neutral state
                 if (DiscPovNumber>0) {
                     if (count < 550) {
-                        joystick.SetDiscPov((((int)count / 20) + 0) % 4, id, 1);
-                        joystick.SetDiscPov((((int)count / 20) + 1) % 4, id, 2);
-                        joystick.SetDiscPov((((int)count / 20) + 2) % 4, id, 3);
-                        joystick.SetDiscPov((((int)count / 20) + 3) % 4, id, 4);
+                        vJoystick.SetDiscPov((((int)count / 20) + 0) % 4, vJoyID, 1);
+                        vJoystick.SetDiscPov((((int)count / 20) + 1) % 4, vJoyID, 2);
+                        vJoystick.SetDiscPov((((int)count / 20) + 2) % 4, vJoyID, 3);
+                        vJoystick.SetDiscPov((((int)count / 20) + 3) % 4, vJoyID, 4);
                     } else {
-                        joystick.SetDiscPov(-1, id, 1);
-                        joystick.SetDiscPov(-1, id, 2);
-                        joystick.SetDiscPov(-1, id, 3);
-                        joystick.SetDiscPov(-1, id, 4);
+                        vJoystick.SetDiscPov(-1, vJoyID, 1);
+                        vJoystick.SetDiscPov(-1, vJoyID, 2);
+                        vJoystick.SetDiscPov(-1, vJoyID, 3);
+                        vJoystick.SetDiscPov(-1, vJoyID, 4);
                     };
                 };
 
                 //Thread.Sleep(20);
-                X += 150; if (X > maxval) X = 0;
-                Y += 250; if (Y > maxval) Y = 0;
-                Z += 350; if (Z > maxval) Z = 0;
-                XR += 220; if (XR > maxval) XR = 0;
-                ZR += 200; if (ZR > maxval) ZR = 0;
-                count++;
+                //X += 150; if (X > maxval) X = 0;
+                //Y += 250; if (Y > maxval) Y = 0;
+                //Z += 350; if (Z > maxval) Z = 0;
+                //XR += 220; if (XR > maxval) XR = 0;
+                //ZR += 200; if (ZR > maxval) ZR = 0;
+                //count++;
 
-                if (count > 640)
-                    count = 0;
+                //if (count > 640)
+                //    count = 0;
 
+                X = data2.X / 2;
+                Y = data2.Y / 2;
+                Z = data2.Z / 2;
+
+                XR = data2.RotationX / 2;
+                YR = data2.RotationY / 2;
+                ZR = data2.RotationZ / 2;
+
+                SL0 = data2.Sliders[0] / 2;
+                SL1 = data2.Sliders[1] / 2;
             } // While (Robust)
-
+            //vJoystick.RelinquishVJD(vJoyID);
 #endif // ROBUST
 #if EFFICIENT
 
@@ -1012,7 +1032,7 @@ namespace Feeder221FB_DI
 
       while (true)
             {
-            iReport.bDevice = (byte)id;
+            iReport.bDevice = (byte)vJoyID;
             iReport.AxisX = X;
             iReport.AxisY = Y;
             iReport.AxisZ = Z;
@@ -1052,11 +1072,11 @@ namespace Feeder221FB_DI
         };
 
         /*** Feed the driver with the position packet - is fails then wait for input then try to re-acquire device ***/
-        if (!joystick.UpdateVJD(id, ref iReport))
+        if (!vJoystick.UpdateVJD(vJoyID, ref iReport))
         {
-            Console.WriteLine("Feeding vJoy device number {0} failed - try to enable device then press enter\n", id);
+            Console.WriteLine("Feeding vJoy device number {0} failed - try to enable device then press enter\n", vJoyID);
             Console.ReadKey(true);
-            joystick.AcquireVJD(id);
+            vJoystick.AcquireVJD(vJoyID);
         }
 
         System.Threading.Thread.Sleep(20);
