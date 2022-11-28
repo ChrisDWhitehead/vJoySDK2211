@@ -76,7 +76,8 @@ namespace Feeder221FB_DI
             // Read PID block
             this.Joystick.FfbReadPID(this.Id, ref this.PIDBlock);
 
-            if (!isRegistered) {
+            if (!isRegistered)
+            {
                 this.wrapper = this.FfbFunction1; //needed to keep a reference!
                 joystick.FfbRegisterGenCB(this.wrapper, IntPtr.Zero);
                 this.isRegistered = true;
@@ -130,27 +131,31 @@ namespace Feeder221FB_DI
 
             /////// Packet Device ID, and Type Block Index (if exists)
             #region Packet Device ID, and Type Block Index
-            
+
 
             uint DeviceID = 0, BlockIndex = 0;
             FFBPType Type = new FFBPType();
 
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_DeviceID(data, ref DeviceID)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_DeviceID(data, ref DeviceID))
+            {
                 LogFormat(" > Device ID: {0}", DeviceID);
             }
 
             // Effect block index only used when simultaneous effects should be done by
             // underlying hardware, which is not the case for a single motor driving wheel
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_EffectBlockIndex(data, ref BlockIndex)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_EffectBlockIndex(data, ref BlockIndex))
+            {
                 LogFormat(" > Effect Block Index: {0}", BlockIndex);
             }
 
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Type(data, ref Type)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Type(data, ref Type))
+            {
                 if (!PacketType2Str(Type, out var TypeStr))
                     LogFormat(" > Packet Type: {0}", Type);
                 else
                     LogFormat(" > Packet Type: {0}", TypeStr);
-                switch (Type) {
+                switch (Type)
+                {
                     case FFBPType.PT_POOLREP:
                         LogFormat(" > Pool report handled by driver side");
                         break;
@@ -172,9 +177,11 @@ namespace Feeder221FB_DI
 
             #region PID Device Control
             FFB_CTRL Control = new FFB_CTRL();
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_DevCtrl(data, ref Control) && DevCtrl2Str(Control, out var CtrlStr)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_DevCtrl(data, ref Control) && DevCtrl2Str(Control, out var CtrlStr))
+            {
                 LogFormat(" >> PID Device Control: {0}", CtrlStr);
-                switch (Control) {
+                switch (Control)
+                {
                     case FFB_CTRL.CTRL_DEVRST:
                         // Update PID data to get the resetted values from driver side
                         Joystick.FfbReadPID(DeviceID, ref PIDBlock);
@@ -195,7 +202,8 @@ namespace Feeder221FB_DI
             #region Create new effect
             FFBEType EffectType = new FFBEType();
             uint NewBlockIndex = 0;
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_CreateNewEffect(data, ref EffectType, ref NewBlockIndex)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_CreateNewEffect(data, ref EffectType, ref NewBlockIndex))
+            {
                 // Create new effect
 
                 // Update PID
@@ -206,7 +214,8 @@ namespace Feeder221FB_DI
                 else
                     LogFormat(" >> Effect Type: Unknown({0})", EffectType);
                 LogFormat(" >> New Effect ID: {0}", NewBlockIndex);
-                if (NewBlockIndex != PIDBlock.PIDBlockLoad.EffectBlockIndex) {
+                if (NewBlockIndex != PIDBlock.PIDBlockLoad.EffectBlockIndex)
+                {
                     LogFormat("!!! BUG NewBlockIndex=" + NewBlockIndex + " <> pid=" + ((int)PIDBlock.PIDBlockLoad.EffectBlockIndex));
                 }
                 LogFormat(" >> LoadStatus {0}", PIDBlock.PIDBlockLoad.LoadStatus);
@@ -215,7 +224,8 @@ namespace Feeder221FB_DI
 
             #region Condition
             vJoy.FFB_EFF_COND Condition = new vJoy.FFB_EFF_COND();
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Cond(data, ref Condition)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Cond(data, ref Condition))
+            {
 
                 if (Condition.isY)
                     LogFormat(" >> Y Axis");
@@ -233,15 +243,19 @@ namespace Feeder221FB_DI
 
             #region Effect Report
             vJoy.FFB_EFF_REPORT Effect = new vJoy.FFB_EFF_REPORT();
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Report(data, ref Effect)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Report(data, ref Effect))
+            {
                 if (!EffectType2Str(Effect.EffectType, out var TypeStr))
                     LogFormat(" >> Effect Report: {0} {1}", (int)Effect.EffectType, Effect.EffectType.ToString());
                 else
                     LogFormat(" >> Effect Report: {0}", TypeStr);
                 LogFormat(" >> AxisEnabledDirection: {0}", (ushort)Effect.AxesEnabledDirection);
-                if (Effect.Polar) {
+                if (Effect.Polar)
+                {
                     LogFormat(" >> Direction: {0} deg ({1})", Polar2Deg(Effect.Direction), Effect.Direction);
-                } else {
+                }
+                else
+                {
                     LogFormat(" >> X Direction: {0}", Effect.DirX);
                     LogFormat(" >> Y Direction: {0}", Effect.DirY);
                 }
@@ -274,7 +288,8 @@ namespace Feeder221FB_DI
 
             #region Effect Operation
             vJoy.FFB_EFF_OP Operation = new vJoy.FFB_EFF_OP();
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_EffOp(data, ref Operation) && EffectOpStr(Operation.EffectOp, out var EffOpStr)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_EffOp(data, ref Operation) && EffectOpStr(Operation.EffectOp, out var EffOpStr))
+            {
 
                 LogFormat(" >> Effect Operation: {0}", EffOpStr);
                 if (Operation.LoopCount == 0xFF)
@@ -282,7 +297,8 @@ namespace Feeder221FB_DI
                 else
                     LogFormat(" >> Loop {0} times", (int)(Operation.LoopCount));
 
-                switch (Operation.EffectOp) {
+                switch (Operation.EffectOp)
+                {
                     case FFBOP.EFF_START:
                         // Start the effect identified by the Effect Handle.
                         break;
@@ -299,7 +315,8 @@ namespace Feeder221FB_DI
 
             #region Global Device Gain
             byte Gain = 0;
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_DevGain(data, ref Gain)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_DevGain(data, ref Gain))
+            {
 
                 LogFormat(" >> Global Device Gain: {0}", Byte2Percent(Gain));
             }
@@ -308,7 +325,8 @@ namespace Feeder221FB_DI
 
             #region Envelope
             vJoy.FFB_EFF_ENVLP Envelope = new vJoy.FFB_EFF_ENVLP();
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Envlp(data, ref Envelope)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Envlp(data, ref Envelope))
+            {
 
                 LogFormat(" >> Attack Level: {0}", Envelope.AttackLevel);
                 LogFormat(" >> Fade Level: {0}", Envelope.FadeLevel);
@@ -320,7 +338,8 @@ namespace Feeder221FB_DI
 
             #region Periodic
             vJoy.FFB_EFF_PERIOD EffPrd = new vJoy.FFB_EFF_PERIOD();
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Period(data, ref EffPrd)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Period(data, ref EffPrd))
+            {
 
                 LogFormat(" >> Magnitude: {0}", EffPrd.Magnitude);
                 LogFormat(" >> Offset: {0}", TwosCompWord2Int(EffPrd.Offset));
@@ -331,7 +350,8 @@ namespace Feeder221FB_DI
 
             #region Ramp Effect
             vJoy.FFB_EFF_RAMP RampEffect = new vJoy.FFB_EFF_RAMP();
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Ramp(data, ref RampEffect)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Ramp(data, ref RampEffect))
+            {
                 LogFormat(" >> Ramp Start: {0}", TwosCompWord2Int(RampEffect.Start));
                 LogFormat(" >> Ramp End: {0}", TwosCompWord2Int(RampEffect.End));
             }
@@ -340,7 +360,8 @@ namespace Feeder221FB_DI
 
             #region Constant Effect
             vJoy.FFB_EFF_CONSTANT CstEffect = new vJoy.FFB_EFF_CONSTANT();
-            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Constant(data, ref CstEffect)) {
+            if ((uint)ERROR.ERROR_SUCCESS == Joystick.Ffb_h_Eff_Constant(data, ref CstEffect))
+            {
                 LogFormat(" >> Block Index: {0}", TwosCompWord2Int(CstEffect.EffectBlockIndex));
                 LogFormat(" >> Magnitude: {0}", TwosCompWord2Int(CstEffect.Magnitude));
             }
@@ -362,7 +383,8 @@ namespace Feeder221FB_DI
             bool stat = true;
             Str = "";
 
-            switch (Type) {
+            switch (Type)
+            {
                 case FFBPType.PT_EFFREP:
                     Str = "Effect Report";
                     break;
@@ -425,7 +447,8 @@ namespace Feeder221FB_DI
             bool stat = true;
             Str = "";
 
-            switch (Type) {
+            switch (Type)
+            {
                 case FFBEType.ET_NONE:
                     stat = false;
                     break;
@@ -479,7 +502,8 @@ namespace Feeder221FB_DI
             bool stat = true;
             Str = "";
 
-            switch (Ctrl) {
+            switch (Ctrl)
+            {
                 case FFB_CTRL.CTRL_ENACT:
                     Str = "Enable Actuators";
                     break;
@@ -512,7 +536,8 @@ namespace Feeder221FB_DI
             bool stat = true;
             Str = "";
 
-            switch (Op) {
+            switch (Op)
+            {
                 case FFBOP.EFF_START:
                     Str = "Effect Start";
                     break;
@@ -548,11 +573,13 @@ namespace Feeder221FB_DI
             int tmp;
             byte inv = (byte)~inb;
             bool isNeg = ((inb >> 7) != 0 ? true : false);
-            if (isNeg) {
+            if (isNeg)
+            {
                 tmp = (int)(inv);
                 tmp = -1 * tmp;
                 return tmp;
-            } else
+            }
+            else
                 return (int)inb;
         }
 
@@ -562,11 +589,13 @@ namespace Feeder221FB_DI
             int tmp;
             int inv = (int)~inb + 1;
             bool isNeg = ((inb >> 15) != 0 ? true : false);
-            if (isNeg) {
+            if (isNeg)
+            {
                 tmp = (int)(inv);
                 tmp = -1 * tmp;
                 return tmp;
-            } else
+            }
+            else
                 return (int)inb;
         }
 
@@ -663,7 +692,7 @@ namespace Feeder221FB_DI
             if (joystickGuid == Guid.Empty)
                 foreach (var deviceInstance in directInput.GetDevices(DeviceType.Joystick, DeviceEnumerationFlags.AllDevices))
                     DIDevices.Add(new DIDevice(deviceInstance.InstanceName, deviceInstance.InstanceGuid));
-            
+
             // Display a list of detected devices
             int i = 1;
             foreach (DIDevice device in DIDevices)
@@ -717,7 +746,7 @@ namespace Feeder221FB_DI
         {
             uint buttons = 0;
             uint index = 0;
-            foreach(bool button in barray)
+            foreach (bool button in barray)
             {
                 if (button)
                 {
@@ -737,23 +766,27 @@ namespace Feeder221FB_DI
 
 
             // Device ID can only be in the range 1-16
-            if (args.Length>0 && !String.IsNullOrEmpty(args[0]))
+            if (args.Length > 0 && !String.IsNullOrEmpty(args[0]))
                 vJoyID = Convert.ToUInt32(args[0]);
-            if (vJoyID <= 0 || vJoyID > 16) {
+            if (vJoyID <= 0 || vJoyID > 16)
+            {
                 Console.WriteLine("Illegal device ID {0}\nExit!", vJoyID);
                 return;
             }
 
             // Get the driver attributes (Vendor ID, Product ID, Version Number)
-            if (!vJoystick.vJoyEnabled()) {
+            if (!vJoystick.vJoyEnabled())
+            {
                 Console.WriteLine("vJoy driver not enabled: Failed Getting vJoy attributes.");
                 return;
-            } else
+            }
+            else
                 Console.WriteLine(" Vendor: {0}\nProduct: {1}\nVersion: {2}", vJoystick.GetvJoyManufacturerString(), vJoystick.GetvJoyProductString(), vJoystick.GetvJoySerialNumberString());
 
             // Get the state of the requested device
             VjdStat status = vJoystick.GetVJDStatus(vJoyID);
-            switch (status) {
+            switch (status)
+            {
                 case VjdStat.VJD_STAT_OWN:
                     Console.WriteLine("vJoy Device {0} is already owned by this feeder", vJoyID);
                     break;
@@ -803,10 +836,12 @@ namespace Feeder221FB_DI
 
 
             // Acquire the target
-            if ((status == VjdStat.VJD_STAT_OWN) || ((status == VjdStat.VJD_STAT_FREE) && (!vJoystick.AcquireVJD(vJoyID)))) {
+            if ((status == VjdStat.VJD_STAT_OWN) || ((status == VjdStat.VJD_STAT_FREE) && (!vJoystick.AcquireVJD(vJoyID))))
+            {
                 Console.WriteLine("Failed to acquire vJoy device number {0}.", vJoyID);
                 return;
-            } else
+            }
+            else
                 Console.WriteLine("Acquired: vJoy device number {0}.", vJoyID);
 
             StartAndRegisterFFB();
@@ -1044,89 +1079,89 @@ namespace Feeder221FB_DI
 #endif // ROBUST
 #if EFFICIENT
 
-        byte[] pov = new byte[4];
-        uint buttons = new uint();
-        
+            byte[] pov = new byte[4];
+            uint buttons = new uint();
 
-        while (true)
+
+            while (true)
             {
-            iReport.bDevice = (byte)vJoyID;
-            iReport.AxisX = X;
-            iReport.AxisY = Y;
-            iReport.AxisZ = Z;
-            iReport.AxisZRot = ZR;
-            iReport.AxisXRot = XR;
+                iReport.bDevice = (byte)vJoyID;
+                iReport.AxisX = X;
+                iReport.AxisY = Y;
+                iReport.AxisZ = Z;
+                iReport.AxisZRot = ZR;
+                iReport.AxisXRot = XR;
 
-            // Set buttons one by one
-            //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
-            // Buttons represented by a binary on/off, bit position represents button position
-            iReport.Buttons = buttons;
+                // Set buttons one by one
+                //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
+                // Buttons represented by a binary on/off, bit position represents button position
+                iReport.Buttons = buttons;
 
-        if (ContPovNumber>0)
-        {
-            // Make Continuous POV Hat spin
-            iReport.bHats		= (count*70);
-            iReport.bHatsEx1	= (count*70)+3000;
-            iReport.bHatsEx2	= (count*70)+5000;
-            iReport.bHatsEx3	= 15000 - (count*70);
-            if ((count*70) > 36000)
-            {
-                iReport.bHats =    0xFFFFFFFF; // Neutral state
-                iReport.bHatsEx1 = 0xFFFFFFFF; // Neutral state
-                iReport.bHatsEx2 = 0xFFFFFFFF; // Neutral state
-                iReport.bHatsEx3 = 0xFFFFFFFF; // Neutral state
-            };
-        }
-        else
-        {
-            // Make 5-position POV Hat spin
-            
-            pov[0] = (byte)(((count / 20) + 0)%4);
-            pov[1] = (byte)(((count / 20) + 1) % 4);
-            pov[2] = (byte)(((count / 20) + 2) % 4);
-            pov[3] = (byte)(((count / 20) + 3) % 4);
+                if (ContPovNumber > 0)
+                {
+                    // Make Continuous POV Hat spin
+                    iReport.bHats = (count * 70);
+                    iReport.bHatsEx1 = (count * 70) + 3000;
+                    iReport.bHatsEx2 = (count * 70) + 5000;
+                    iReport.bHatsEx3 = 15000 - (count * 70);
+                    if ((count * 70) > 36000)
+                    {
+                        iReport.bHats = 0xFFFFFFFF; // Neutral state
+                        iReport.bHatsEx1 = 0xFFFFFFFF; // Neutral state
+                        iReport.bHatsEx2 = 0xFFFFFFFF; // Neutral state
+                        iReport.bHatsEx3 = 0xFFFFFFFF; // Neutral state
+                    };
+                }
+                else
+                {
+                    // Make 5-position POV Hat spin
 
-            iReport.bHats		= (uint)(pov[3]<<12) | (uint)(pov[2]<<8) | (uint)(pov[1]<<4) | (uint)pov[0];
-            if ((count) > 550)
-                iReport.bHats = 0xFFFFFFFF; // Neutral state
-        };
+                    pov[0] = (byte)(((count / 20) + 0) % 4);
+                    pov[1] = (byte)(((count / 20) + 1) % 4);
+                    pov[2] = (byte)(((count / 20) + 2) % 4);
+                    pov[3] = (byte)(((count / 20) + 3) % 4);
 
-        /*** Feed the driver with the position packet - is fails then wait for input then try to re-acquire device ***/
-        if (!vJoystick.UpdateVJD(vJoyID, ref iReport))
-        {
-            Console.WriteLine("Feeding vJoy device number {0} failed - try to enable device then press enter\n", vJoyID);
-            Console.ReadKey(true);
-            vJoystick.AcquireVJD(vJoyID);
-        }
+                    iReport.bHats = (uint)(pov[3] << 12) | (uint)(pov[2] << 8) | (uint)(pov[1] << 4) | (uint)pov[0];
+                    if ((count) > 550)
+                        iReport.bHats = 0xFFFFFFFF; // Neutral state
+                };
 
-        System.Threading.Thread.Sleep(5);
-        count++;
-        if (count > 640) count = 0;
+                /*** Feed the driver with the position packet - is fails then wait for input then try to re-acquire device ***/
+                if (!vJoystick.UpdateVJD(vJoyID, ref iReport))
+                {
+                    Console.WriteLine("Feeding vJoy device number {0} failed - try to enable device then press enter\n", vJoyID);
+                    Console.ReadKey(true);
+                    vJoystick.AcquireVJD(vJoyID);
+                }
 
-        diJoystick.Poll();
-        data2 = diJoystick.GetCurrentState();
+                System.Threading.Thread.Sleep(5);
+                count++;
+                if (count > 640) count = 0;
 
-        buttons = GetButtons(data2.Buttons);
+                diJoystick.Poll();
+                data2 = diJoystick.GetCurrentState();
 
-        X = data2.X / 2;
-        Y = data2.Y / 2;
-        Z = data2.Z / 2;
+                buttons = GetButtons(data2.Buttons);
 
-        XR = data2.RotationX / 2;
-        YR = data2.RotationY / 2;
-        ZR = data2.RotationZ / 2;
+                X = data2.X / 2;
+                Y = data2.Y / 2;
+                Z = data2.Z / 2;
 
-        SL0 = data2.Sliders[0] / 2;
-        SL1 = data2.Sliders[1] / 2;
+                XR = data2.RotationX / 2;
+                YR = data2.RotationY / 2;
+                ZR = data2.RotationZ / 2;
+
+                SL0 = data2.Sliders[0] / 2;
+                SL1 = data2.Sliders[1] / 2;
 
 
-        //X += 150; if (X > maxval) X = 0;
-        //Y += 250; if (Y > maxval) Y = 0;
-        //Z += 350; if (Z > maxval) Z = 0;
-        //XR += 220; if (XR > maxval) XR = 0;
-        //ZR += 200; if (ZR > maxval) ZR = 0;  
-         
-        }; // While
+                //X += 150; if (X > maxval) X = 0;
+                //Y += 250; if (Y > maxval) Y = 0;
+                //Z += 350; if (Z > maxval) Z = 0;
+                //XR += 220; if (XR > maxval) XR = 0;
+                //ZR += 200; if (ZR > maxval) ZR = 0;  
+
+            }; // While
 
 #endif // EFFICIENT
 
