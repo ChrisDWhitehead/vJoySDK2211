@@ -1172,6 +1172,11 @@ namespace Feeder221FB_DI
                 Array.Copy(data2.Buttons, 64, bbuttonsEx1, 0, 32);
                 Array.Copy(data2.Buttons, 96, bbuttonsEx1, 0, 32);
 
+                // To mask out buttons, set the bbuttons... array postiions to 
+                // false.
+                bbuttons[9] = false;
+                bbuttons[12] = false;
+
                 buttons = GetButtons(bbuttons);
                 buttonsEx1 = GetButtons(bbuttonsEx1);
                 buttonsEx2 = GetButtons(bbuttonsEx2);
