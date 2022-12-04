@@ -753,7 +753,7 @@ namespace Feeder221FB_DI
             {
                 if (button)
                 {
-                    buttons |= (byte)(1 << (index));
+                    buttons |= (uint)(1 << (index));
                 }
                 index++;
             }
@@ -1115,9 +1115,9 @@ namespace Feeder221FB_DI
                 //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
                 // Buttons represented by a binary on/off, bit position represents button position
                 iReport.Buttons = buttons;
-                iReport.ButtonsEx1 = 1;
-                iReport.ButtonsEx2 = 1;
-                iReport.ButtonsEx3 = 1;
+                iReport.ButtonsEx1 = buttonsEx1;
+                iReport.ButtonsEx2 = buttonsEx2;
+                iReport.ButtonsEx3 = buttonsEx3;
 
                 if (ContPovNumber > 0)
                 {
@@ -1163,6 +1163,9 @@ namespace Feeder221FB_DI
                 diJoystick.Poll();
                 data2 = diJoystick.GetCurrentState();
                 Array.Copy(data2.Buttons, 0, bbuttons, 0, 32);
+                Array.Copy(data2.Buttons, 32, bbuttonsEx1, 0, 32);
+                Array.Copy(data2.Buttons, 64, bbuttonsEx1, 0, 32);
+                Array.Copy(data2.Buttons, 96, bbuttonsEx1, 0, 32);
 
                 buttons = GetButtons(bbuttons);
                 //WriteLine(data2.Buttons.Length);
