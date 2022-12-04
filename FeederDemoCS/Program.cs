@@ -1168,6 +1168,9 @@ namespace Feeder221FB_DI
                 Array.Copy(data2.Buttons, 96, bbuttonsEx1, 0, 32);
 
                 buttons = GetButtons(bbuttons);
+                buttonsEx1 = GetButtons(bbuttonsEx1);
+                buttonsEx2 = GetButtons(bbuttonsEx2);
+                buttonsEx3 = GetButtons(bbuttonsEx3);
                 //WriteLine(data2.Buttons.Length);
 
                 X = data2.X / 2;
