@@ -601,7 +601,7 @@ namespace Feeder221FB_DI
 
     }
 
-    //Create ENUM for button name to buttons index
+    //Create ENUM for button name to buttons index. For Saitek X36 only.
     enum BN
     {
         TRIG,
@@ -631,6 +631,8 @@ namespace Feeder221FB_DI
         MOUSEdn,
         MOUSEbk,
     }
+
+    // Put into separate file
     public class DIDevice
     {
         public String name;
@@ -676,13 +678,13 @@ namespace Feeder221FB_DI
             return 0;
         }
 
-        static Joystick InitJoystick()
+        static Joystick InitJoystick() // Change name to GetDIJoystick()? Put in separate file
         {
             // Initialize DirectInput
             var directInput = new DirectInput();
 
             // Find a Joystick Guid
-            var joystickGuid = Guid.Empty;
+            var joystickGuid = Guid.Empty; // Change name to DIJoystick
             ArrayList DIDevices = new ArrayList();
 
             foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
@@ -745,16 +747,17 @@ namespace Feeder221FB_DI
         static public uint GetButtons(bool[] barray)
         {
             uint buttons = 0;
-            uint index = 0;
+
+            int index = 0;
             foreach (bool button in barray)
             {
                 if (button)
                 {
-                    buttons += 2 ^ index;
+                    buttons |= (byte)(1 << (index));
                 }
                 index++;
             }
-            return buttons;
+            return (uint)buttons;
         }
 
         static void Main(string[] args)
@@ -810,6 +813,11 @@ namespace Feeder221FB_DI
             bool AxisZ = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_Z);
             bool AxisRX = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_RX);
             bool AxisRZ = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_RZ);
+            bool AxisRY = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_RY);
+            bool AxisSL0 = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_SL0);
+            bool AxisSL1 = vJoystick.GetVJDAxisExist(vJoyID, HID_USAGES.HID_USAGE_SL1);
+
+
             // Get the number of buttons and POV Hat switches supported by this vJoy device
             int nButtons = vJoystick.GetVJDButtonNumber(vJoyID);
             int ContPovNumber = vJoystick.GetVJDContPovNumber(vJoyID);
@@ -821,10 +829,14 @@ namespace Feeder221FB_DI
             Console.WriteLine("Number of Continuous POVs\t{0}", ContPovNumber);
             Console.WriteLine("Number of Discrete POVs\t\t{0}", DiscPovNumber);
             Console.WriteLine("Axis X\t\t{0}", AxisX ? "Yes" : "No");
-            Console.WriteLine("Axis Y\t\t{0}", AxisX ? "Yes" : "No");
-            Console.WriteLine("Axis Z\t\t{0}", AxisX ? "Yes" : "No");
+            Console.WriteLine("Axis Y\t\t{0}", AxisY ? "Yes" : "No");
+            Console.WriteLine("Axis Z\t\t{0}", AxisZ ? "Yes" : "No");
             Console.WriteLine("Axis Rx\t\t{0}", AxisRX ? "Yes" : "No");
+            Console.WriteLine("Axis Ry\t\t{0}", AxisRY ? "Yes" : "No");
             Console.WriteLine("Axis Rz\t\t{0}", AxisRZ ? "Yes" : "No");
+            Console.WriteLine("Axis SL0\t\t{0}", AxisSL0 ? "Yes" : "No");
+            Console.WriteLine("Axis SL1\t\t{0}", AxisSL1 ? "Yes" : "No");
+
 
             // Test if DLL matches the driver
             UInt32 DllVer = 0, DrvVer = 0;
@@ -1081,6 +1093,13 @@ namespace Feeder221FB_DI
 
             byte[] pov = new byte[4];
             uint buttons = new uint();
+            bool[] bbuttons = new bool[32];
+            uint buttonsEx1 = new uint();
+            bool[] bbuttonsEx1 = new bool[32];
+            uint buttonsEx2 = new uint();
+            bool[] bbuttonsEx2 = new bool[32];
+            uint buttonsEx3 = new uint();
+            bool[] bbuttonsEx3 = new bool[32];
 
 
             while (true)
@@ -1096,6 +1115,9 @@ namespace Feeder221FB_DI
                 //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
                 // Buttons represented by a binary on/off, bit position represents button position
                 iReport.Buttons = buttons;
+                iReport.ButtonsEx1 = 1;
+                iReport.ButtonsEx2 = 1;
+                iReport.ButtonsEx3 = 1;
 
                 if (ContPovNumber > 0)
                 {
@@ -1140,8 +1162,10 @@ namespace Feeder221FB_DI
 
                 diJoystick.Poll();
                 data2 = diJoystick.GetCurrentState();
+                Array.Copy(data2.Buttons, 0, bbuttons, 0, 32);
 
-                buttons = GetButtons(data2.Buttons);
+                buttons = GetButtons(bbuttons);
+                //WriteLine(data2.Buttons.Length);
 
                 X = data2.X / 2;
                 Y = data2.Y / 2;
