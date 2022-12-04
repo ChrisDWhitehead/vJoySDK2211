@@ -32,6 +32,7 @@ using static System.Convert;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 
 // Don't forget to add this
 using vJoyInterfaceWrap;
@@ -881,6 +882,7 @@ namespace Feeder221FB_DI
             SL1 = 0;
 
             vJoystick.GetVJDAxisMax(vJoyID, HID_USAGES.HID_USAGE_X, ref maxval);
+            Debug.WriteLine("" + maxval);
 
 #if ROBUST
             bool res;
@@ -1107,11 +1109,12 @@ namespace Feeder221FB_DI
                 iReport.bDevice = (byte)vJoyID;
                 iReport.AxisX = X;
                 iReport.AxisY = Y;
-                iReport.AxisZ = SL1;
+                //iReport.AxisZ = SL1;
                 iReport.AxisZRot = ZR;
                 iReport.AxisXRot = XR;
                 iReport.AxisYRot = YR;
                 iReport.Slider = SL0;
+                iReport.Dial = SL1;
 
 
                 // Set buttons one by one
@@ -1172,7 +1175,7 @@ namespace Feeder221FB_DI
                 Array.Copy(data2.Buttons, 64, bbuttonsEx1, 0, 32);
                 Array.Copy(data2.Buttons, 96, bbuttonsEx1, 0, 32);
 
-                // To mask out buttons, set the bbuttons... array postiions to 
+                // To mask out buttons, set the bbuttonsEx? array postiions to 
                 // false.
                 bbuttons[9] = false;
                 bbuttons[12] = false;
@@ -1182,7 +1185,7 @@ namespace Feeder221FB_DI
                 buttonsEx2 = GetButtons(bbuttonsEx2);
                 buttonsEx3 = GetButtons(bbuttonsEx3);
                 iReport.bHats = (uint)data2.PointOfViewControllers[0];
-                WriteLine(data2.PointOfViewControllers[0]);
+                //WriteLine(data2.PointOfViewControllers[0]);
 
                 X = data2.X / 2;
                 Y = data2.Y / 2;
