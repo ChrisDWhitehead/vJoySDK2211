@@ -1107,9 +1107,12 @@ namespace Feeder221FB_DI
                 iReport.bDevice = (byte)vJoyID;
                 iReport.AxisX = X;
                 iReport.AxisY = Y;
-                iReport.AxisZ = Z;
+                iReport.AxisZ = SL1;
                 iReport.AxisZRot = ZR;
                 iReport.AxisXRot = XR;
+                iReport.AxisYRot = YR;
+                iReport.Slider = SL0;
+
 
                 // Set buttons one by one
                 //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
@@ -1119,35 +1122,37 @@ namespace Feeder221FB_DI
                 iReport.ButtonsEx2 = buttonsEx2;
                 iReport.ButtonsEx3 = buttonsEx3;
 
-                if (ContPovNumber > 0)
-                {
-                    // Make Continuous POV Hat spin
-                    iReport.bHats = (count * 70);
-                    iReport.bHatsEx1 = (count * 70) + 3000;
-                    iReport.bHatsEx2 = (count * 70) + 5000;
-                    iReport.bHatsEx3 = 15000 - (count * 70);
-                    if ((count * 70) > 36000)
-                    {
-                        iReport.bHats = 0xFFFFFFFF; // Neutral state
-                        iReport.bHatsEx1 = 0xFFFFFFFF; // Neutral state
-                        iReport.bHatsEx2 = 0xFFFFFFFF; // Neutral state
-                        iReport.bHatsEx3 = 0xFFFFFFFF; // Neutral state
-                    };
-                }
-                else
-                {
-                    // Make 5-position POV Hat spin
 
-                    pov[0] = (byte)(((count / 20) + 0) % 4);
-                    pov[1] = (byte)(((count / 20) + 1) % 4);
-                    pov[2] = (byte)(((count / 20) + 2) % 4);
-                    pov[3] = (byte)(((count / 20) + 3) % 4);
+                #region POV
+                //if (ContPovNumber > 0)
+                //{
+                //    // Make Continuous POV Hat spin
+                //    iReport.bHats = (count * 70);
+                //    iReport.bHatsEx1 = (count * 70) + 3000;
+                //    iReport.bHatsEx2 = (count * 70) + 5000;
+                //    iReport.bHatsEx3 = 15000 - (count * 70);
+                //    if ((count * 70) > 36000)
+                //    {
+                //        iReport.bHats = 0xFFFFFFFF; // Neutral state
+                //        iReport.bHatsEx1 = 0xFFFFFFFF; // Neutral state
+                //        iReport.bHatsEx2 = 0xFFFFFFFF; // Neutral state
+                //        iReport.bHatsEx3 = 0xFFFFFFFF; // Neutral state
+                //    };
+                //}
+                //else
+                //{
+                //    // Make 5-position POV Hat spin
 
-                    iReport.bHats = (uint)(pov[3] << 12) | (uint)(pov[2] << 8) | (uint)(pov[1] << 4) | (uint)pov[0];
-                    if ((count) > 550)
-                        iReport.bHats = 0xFFFFFFFF; // Neutral state
-                };
+                //    pov[0] = (byte)(((count / 20) + 0) % 4);
+                //    pov[1] = (byte)(((count / 20) + 1) % 4);
+                //    pov[2] = (byte)(((count / 20) + 2) % 4);
+                //    pov[3] = (byte)(((count / 20) + 3) % 4);
 
+                //    iReport.bHats = (uint)(pov[3] << 12) | (uint)(pov[2] << 8) | (uint)(pov[1] << 4) | (uint)pov[0];
+                //    if ((count) > 550)
+                //        iReport.bHats = 0xFFFFFFFF; // Neutral state
+                //};
+                #endregion POV
                 /*** Feed the driver with the position packet - is fails then wait for input then try to re-acquire device ***/
                 if (!vJoystick.UpdateVJD(vJoyID, ref iReport))
                 {
@@ -1171,7 +1176,8 @@ namespace Feeder221FB_DI
                 buttonsEx1 = GetButtons(bbuttonsEx1);
                 buttonsEx2 = GetButtons(bbuttonsEx2);
                 buttonsEx3 = GetButtons(bbuttonsEx3);
-                //WriteLine(data2.Buttons.Length);
+                iReport.bHats = (uint)data2.PointOfViewControllers[0];
+                WriteLine(data2.PointOfViewControllers[0]);
 
                 X = data2.X / 2;
                 Y = data2.Y / 2;
