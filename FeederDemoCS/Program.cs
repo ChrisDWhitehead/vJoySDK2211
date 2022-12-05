@@ -1200,8 +1200,9 @@ namespace Feeder221FB_DI
                     Console.ReadKey(true);
                     vJoystick.AcquireVJD(vJoyID);
                 }
-
-                System.Threading.Thread.Sleep(5);
+                // polling rate of once every xMS, 1ms is 'pro-gamer' level
+                // 16ms is low webbrowser quality, 8ms average mouse
+                System.Threading.Thread.Sleep(1);
             }; // While
 
 #endif // EFFICIENT
