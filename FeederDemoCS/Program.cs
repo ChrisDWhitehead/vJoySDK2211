@@ -709,6 +709,8 @@ namespace Feeder221FB_DI
             while (choice < 1 | choice > DIDevices.Count)
             {
                 WriteLine("Choose a Joystick to use: ");
+                // MUST add error code here, will crash if ToInt32 fails.
+                // use try/catch with default choice = 1
                 choice = ToInt32(ReadLine());
             }
             joystickGuid = ((DIDevice)DIDevices[choice - 1]).id;
