@@ -1118,8 +1118,10 @@ namespace Feeder221FB_DI
 
 
                 // Set buttons one by one
-                //iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
-                // Buttons represented by a binary on/off, bit position represents button position
+                // iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
+                // SharpDX reports buttons in a single bool array of size 128
+                // vJoy Efficient mode uses 4 uint registers to represent buttons
+                // bit positions represent each button in four ranges 1-32, 33-64, 65-96, 97-128
                 iReport.Buttons = buttons;
                 iReport.ButtonsEx1 = buttonsEx1;
                 iReport.ButtonsEx2 = buttonsEx2;
@@ -1170,33 +1172,39 @@ namespace Feeder221FB_DI
 
                 diJoystick.Poll();
                 data2 = diJoystick.GetCurrentState();
+                // Split bool[128] array into 4 bool[32] arrays
                 Array.Copy(data2.Buttons, 0, bbuttons, 0, 32);
                 Array.Copy(data2.Buttons, 32, bbuttonsEx1, 0, 32);
                 Array.Copy(data2.Buttons, 64, bbuttonsEx1, 0, 32);
                 Array.Copy(data2.Buttons, 96, bbuttonsEx1, 0, 32);
 
-                // To mask out buttons, set the bbuttonsEx? array postiions to 
+                // To mask out buttons, set the bbuttons... array postiions to 
                 // false.
                 bbuttons[9] = false;
                 bbuttons[12] = false;
 
+                // GetButtons(bool[]) uses a loop and indexed bit shift with OR
+                // accumulation to turn bools into uint value.
                 buttons = GetButtons(bbuttons);
                 buttonsEx1 = GetButtons(bbuttonsEx1);
                 buttonsEx2 = GetButtons(bbuttonsEx2);
                 buttonsEx3 = GetButtons(bbuttonsEx3);
+                // vJoy and DI both allow the same format for continuous POV
+                // can use a direct assignment
                 iReport.bHats = (uint)data2.PointOfViewControllers[0];
-                //WriteLine(data2.PointOfViewControllers[0]);
 
-                X = data2.X / 2;
-                Y = data2.Y / 2;
-                Z = data2.Z / 2;
+                // vJoy only accepts 32767 axis Max value while DI allows 65534
+                // need to halve the reported DI values
+                X = data2.X / 2; // stick x axis
+                Y = data2.Y / 2; // stick y axis
+                Z = data2.Z / 2; // not used by Saitek X36
 
-                XR = data2.RotationX / 2;
-                YR = data2.RotationY / 2;
-                ZR = data2.RotationZ / 2;
+                XR = data2.RotationX / 2; // upper dial
+                YR = data2.RotationY / 2; // not used by Saitek X36
+                ZR = data2.RotationZ / 2; // rudder axis
 
-                SL0 = data2.Sliders[0] / 2;
-                SL1 = data2.Sliders[1] / 2;
+                SL0 = data2.Sliders[0] / 2; // throttle axis
+                SL1 = data2.Sliders[1] / 2; // lower dial
 
 
                 //X += 150; if (X > maxval) X = 0;
