@@ -656,7 +656,6 @@ namespace Feeder221FB_DI
         static public vJoyFFBReceiver FFBReceiver;
         static public uint vJoyID = 1;
         static public string deviceName;
-        //static ArrayList DIDevices = new ArrayList();
 
         static public int StartAndRegisterFFB()
         {
@@ -720,7 +719,7 @@ namespace Feeder221FB_DI
             // If Joystick not found, throws an error
             if (joystickGuid == Guid.Empty)
             {
-                Console.WriteLine("No joystick/Gamepad found.");
+                Console.WriteLine("No joystick/Gamepad found.\nEnter to continue...");
                 Console.ReadKey();
                 Environment.Exit(1);
             }
@@ -728,16 +727,16 @@ namespace Feeder221FB_DI
             // Instantiate the Direct Input joystick
             var diJoystick = new Joystick(directInput, joystickGuid);
 
-            Console.WriteLine("Found Joystick/Gamepad with GUID: {0} \n", joystickGuid);
+            Console.WriteLine("Found Joystick/Gamepad with GUID: {0} \nEnter to continue...\n", joystickGuid);
             Console.ReadKey();
             Console.Clear();
 
             // Query all suported ForceFeedback effects
             var allEffects = diJoystick.GetEffects();
             foreach (var effectInfo in allEffects)
-                Console.WriteLine("Effect available {0}", effectInfo.Name);
+                Console.WriteLine("Effect available {0}\nEnter to continue...", effectInfo.Name);
             if (allEffects.Count == 0)
-                WriteLine("Force Feedback Effects not supported");
+                WriteLine("Force Feedback Effects not supported\nEnter to continue...");
             ReadKey();
             Clear();
 
@@ -871,7 +870,6 @@ namespace Feeder221FB_DI
             JoystickState data2;
 
             int X, Y, Z, ZR, YR, XR, SL0, SL1;
-            uint count = 0;
             long maxval = 0;
 
             X = 20;
@@ -1108,6 +1106,40 @@ namespace Feeder221FB_DI
 
             while (true)
             {
+
+                diJoystick.Poll();
+                data2 = diJoystick.GetCurrentState();
+                // Split bool[128] array into 4 bool[32] arrays
+                Array.Copy(data2.Buttons, 0, bbuttons, 0, 32);
+                Array.Copy(data2.Buttons, 32, bbuttonsEx1, 0, 32);
+                Array.Copy(data2.Buttons, 64, bbuttonsEx1, 0, 32);
+                Array.Copy(data2.Buttons, 96, bbuttonsEx1, 0, 32);
+
+                // To mask out buttons, set the bbuttons... array postiions to 
+                // false.
+                bbuttons[9] = false;
+                bbuttons[12] = false;
+
+                // GetButtons(bool[]) uses a loop and indexed bit shift with OR
+                // accumulation to turn bools into uint value.
+                buttons = GetButtons(bbuttons);
+                buttonsEx1 = GetButtons(bbuttonsEx1);
+                buttonsEx2 = GetButtons(bbuttonsEx2);
+                buttonsEx3 = GetButtons(bbuttonsEx3);
+
+                // vJoy only accepts 32767 axis Max value while DI allows 65534
+                // need to halve the reported DI values
+                X = data2.X / 2; // stick x axis
+                Y = data2.Y / 2; // stick y axis
+                Z = data2.Z / 2; // not used by Saitek X36
+
+                XR = data2.RotationX / 2; // upper dial
+                YR = data2.RotationY / 2; // not used by Saitek X36
+                ZR = data2.RotationZ / 2; // rudder axis
+
+                SL0 = data2.Sliders[0] / 2; // throttle axis
+                SL1 = data2.Sliders[1] / 2; // lower dial
+
                 iReport.bDevice = (byte)vJoyID;
                 iReport.AxisX = X;
                 iReport.AxisY = Y;
@@ -1118,7 +1150,6 @@ namespace Feeder221FB_DI
                 iReport.Slider = SL0;
                 iReport.Dial = SL1;
 
-
                 // Set buttons one by one
                 // iReport.Buttons = (uint)(0x1 <<  (int)(count / 20));
                 // SharpDX reports buttons in a single bool array of size 128
@@ -1128,7 +1159,9 @@ namespace Feeder221FB_DI
                 iReport.ButtonsEx1 = buttonsEx1;
                 iReport.ButtonsEx2 = buttonsEx2;
                 iReport.ButtonsEx3 = buttonsEx3;
-
+                // vJoy and DI both allow the same format for continuous POV
+                // can use a direct assignment
+                iReport.bHats = (uint)data2.PointOfViewControllers[0];
 
                 #region POV
                 //if (ContPovNumber > 0)
@@ -1160,7 +1193,7 @@ namespace Feeder221FB_DI
                 //        iReport.bHats = 0xFFFFFFFF; // Neutral state
                 //};
                 #endregion POV
-                /*** Feed the driver with the position packet - is fails then wait for input then try to re-acquire device ***/
+                /*** Feed the driver with the position packet - if fails then wait for input then try to re-acquire device ***/
                 if (!vJoystick.UpdateVJD(vJoyID, ref iReport))
                 {
                     Console.WriteLine("Feeding vJoy device number {0} failed - try to enable device then press enter\n", vJoyID);
@@ -1169,52 +1202,6 @@ namespace Feeder221FB_DI
                 }
 
                 System.Threading.Thread.Sleep(5);
-                count++;
-                if (count > 640) count = 0;
-
-                diJoystick.Poll();
-                data2 = diJoystick.GetCurrentState();
-                // Split bool[128] array into 4 bool[32] arrays
-                Array.Copy(data2.Buttons, 0, bbuttons, 0, 32);
-                Array.Copy(data2.Buttons, 32, bbuttonsEx1, 0, 32);
-                Array.Copy(data2.Buttons, 64, bbuttonsEx1, 0, 32);
-                Array.Copy(data2.Buttons, 96, bbuttonsEx1, 0, 32);
-
-                // To mask out buttons, set the bbuttons... array postiions to 
-                // false.
-                bbuttons[9] = false;
-                bbuttons[12] = false;
-
-                // GetButtons(bool[]) uses a loop and indexed bit shift with OR
-                // accumulation to turn bools into uint value.
-                buttons = GetButtons(bbuttons);
-                buttonsEx1 = GetButtons(bbuttonsEx1);
-                buttonsEx2 = GetButtons(bbuttonsEx2);
-                buttonsEx3 = GetButtons(bbuttonsEx3);
-                // vJoy and DI both allow the same format for continuous POV
-                // can use a direct assignment
-                iReport.bHats = (uint)data2.PointOfViewControllers[0];
-
-                // vJoy only accepts 32767 axis Max value while DI allows 65534
-                // need to halve the reported DI values
-                X = data2.X / 2; // stick x axis
-                Y = data2.Y / 2; // stick y axis
-                Z = data2.Z / 2; // not used by Saitek X36
-
-                XR = data2.RotationX / 2; // upper dial
-                YR = data2.RotationY / 2; // not used by Saitek X36
-                ZR = data2.RotationZ / 2; // rudder axis
-
-                SL0 = data2.Sliders[0] / 2; // throttle axis
-                SL1 = data2.Sliders[1] / 2; // lower dial
-
-
-                //X += 150; if (X > maxval) X = 0;
-                //Y += 250; if (Y > maxval) Y = 0;
-                //Z += 350; if (Z > maxval) Z = 0;
-                //XR += 220; if (XR > maxval) XR = 0;
-                //ZR += 200; if (ZR > maxval) ZR = 0;  
-
             }; // While
 
 #endif // EFFICIENT
